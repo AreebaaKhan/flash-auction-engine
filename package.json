@@ -1,0 +1,19 @@
+{
+  "name": "flash-auction-engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Flashroom: a real-time auction and disaster recovery teaching prototype",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "contention": "node scripts/contention.js",
+    "naive": "node scripts/naive.js",
+    "loadtest": "node scripts/loadtest.js",
+    "backup": "node --env-file-if-exists=.env scripts/backup.js",
+    "backup:watch": "node --env-file-if-exists=.env scripts/backup.js --watch",
+    "disaster": "node scripts/disaster-demo.js"
+  },
+  "dependencies": { "ws": "8.18.3" }
+}
