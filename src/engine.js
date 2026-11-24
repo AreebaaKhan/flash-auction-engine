@@ -73,7 +73,7 @@ export class Engine {
     else if (now < a.startsAt) reason = 'NOT_STARTED';
     else if (amount < minimum) reason = 'BID_TOO_LOW';
     if (reason) {
-      const result = { ok: false, reason, minimum, serverTime: now };
+      const result = { ok: false, reason, minimum, version: a.version, serverTime: now };
       this.q.saveOutcome.run(id, user.id, key, amount, JSON.stringify(result));
       return result;
     }

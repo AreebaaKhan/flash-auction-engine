@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "command": "npm test",
+  "node": "v24.22.1",
+  "platform": "Windows",
+  "tests": 16,
+  "passed": 16,
+  "failed": 0,
+  "cancelled": 0,
+  "skipped": 0,
+  "durationMs": 3272.7945,
+  "note": "Actual final node:test output. Real localhost integration tests required execution outside the restricted tool shell. Browser visual QA was unavailable."
+}

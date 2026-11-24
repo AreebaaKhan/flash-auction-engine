@@ -25,8 +25,13 @@ function minimum(a) { const own = a.topN.find(p => p.userId === user.id)?.amount
 function sparkline(history) { const values = history.map(p => p.amount); if (!values.length) return '<span class="muted">Your first bid starts the story.</span>'; const min = Math.min(...values) * .9; const max = Math.max(...values); const points = values.map((v, i) => `${i * 300 / Math.max(1, values.length - 1)},${65 - (v - min) / Math.max(1, max - min) * 55}`).join(' '); return `<svg viewBox="0 0 300 75" role="img" aria-label="Last ${values.length} bid amounts"><polyline points="${points}" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke"/></svg>`; }
 function renderAuction(a, old) {
   const view = $('#auction-view'); const priorInput = $('#bid-amount')?.value; const focused = document.activeElement?.id === 'bid-amount';
+  const oldRects = new Map([...view.querySelectorAll('.leader')].map((el, i) => [old?.topN[i]?.userId, el.getBoundingClientRect()]));
   const ended = a.status === 'ended'; const required = minimum(a);
   view.innerHTML = `<div class="detail-heading"><div><p class="eyebrow">${ended ? 'THE RESULTS ARE IN' : 'YOU ARE IN THE ROOM'}</p><h1>${escape(a.item)}</h1></div><span class="pill">${a.stock} ${a.stock === 1 ? 'item' : 'items'} · one per winner</span></div><div class="detail-grid"><section class="card price-card"><div class="section-title"><span class="eyebrow">HIGHEST BID</span><span class="pill" id="detail-status">${status(a)}</span></div><div class="big-price ${old && old.highest !== a.highest ? 'flash' : ''}"><span>PKR</span> ${money(a.highest || a.startingPrice)}</div><div class="price-meta"><span>${a.bidCount} accepted bids</span><span>Increment PKR ${money(a.minIncrement)}</span></div><div class="timer-line"><span>${status(a) === 'Upcoming' ? 'Starts in' : 'Closes in'}</span><strong id="detail-time">${time(a)}</strong></div><div class="progress"><div id="time-progress"></div></div><div id="extension" class="extension ${old && old.extensions < a.extensions ? 'show' : ''}">+${a.antiExtensionMs / 1000}s extended · keep your spot</div><div class="sparkline">${sparkline(a.history)}</div>${ended ? `<div class="result-banner">Auction closed. ${a.winners.length} ${a.winners.length === 1 ? 'winner' : 'winners'} confirmed.</div>` : `<form id="bid-form"><label for="bid-amount">Your bid · PKR</label><div class="bid-entry"><input id="bid-amount" type="number" step="0.01" min="${required / 100}" max="10000000" value="${required / 100}" required><button class="primary" type="submit">Place bid</button></div><div class="quick-bids"><button type="button" data-step="1">Minimum bid</button><button type="button" data-step="2">+2 increments</button><button type="button" data-step="5">+5 increments</button></div><p class="muted bid-hint">Minimum PKR ${money(required)} · Your bid is saved before confirmation.</p></form>`}</section><section class="card leaderboard"><div class="section-title"><h2>${ended ? 'The winners' : 'Winning positions'}</h2><span class="count">${a.topN.length}/${a.stock}</span></div><p class="muted">${ended ? 'One item each. Final bids are recorded.' : 'Hold a top spot when the clock runs out.'}</p><div class="leaders ${ended ? 'celebrate' : ''}">${a.topN.length ? a.topN.map((p, i) => `<div class="leader ${p.userId === user.id ? 'is-you' : ''} ${ended ? 'winner rank-' + (i + 1) : ''}" style="--rank:${i}"><span class="rank">${ended && i === 0 ? '♛' : String(i + 1).padStart(2, '0')}</span><span class="avatar">${escape(p.name.slice(0, 1))}</span><span class="bidder">${escape(p.name)}${p.userId === user.id ? '<small>YOU</small>' : ''}</span><b>PKR ${money(p.amount)}</b></div>`).join('') : '<div class="empty small"><h3>Make the opening move.</h3><p>The first winning spot could be yours.</p></div>'}</div><div class="room-note"><span class="note-icon">✓</span><p>One item per bidder.<br><span class="muted">The top ${a.stock} distinct bidders take the drop.</span></p></div></section></div>`;
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) for (const [i, row] of [...view.querySelectorAll('.leader')].entries()) {
+    const previous = oldRects.get(a.topN[i]?.userId);
+    if (previous) { const distance = previous.top - row.getBoundingClientRect().top; if (distance) row.animate([{ transform: `translateY(${distance}px)` }, { transform: 'translateY(0)' }], { duration: 300, easing: 'ease-out' }); }
+  }
   if (!ended) {
     if (focused && priorInput) { $('#bid-amount').value = priorInput; $('#bid-amount').focus(); }
     $('#bid-form').onsubmit = e => { e.preventDefault(); const amount = Math.round(Number($('#bid-amount').value) * 100); if (!Number.isSafeInteger(amount) || amount < required) return toast(`Minimum bid is PKR ${money(required)}`, true); try { connection.bid(amount); } catch (e) { toast(e.message, true); } };
@@ -41,10 +46,12 @@ function tick() {
 }
 setInterval(tick, 200);
 async function login() {
+  const previousPending = connection?.pending; const previousUser = user?.id;
   connection?.close(); const id = $('#identity').value; sessionStorage.setItem('flashroom-user', id);
   const response = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: id }) });
   if (!response.ok) throw new Error('Sign-in failed. Please reload.');
   ({ token, user } = await response.json()); $('#admin').hidden = user.role !== 'admin';
+  if (previousUser && previousUser !== user.id) state = null;
   connection = new LiveConnection(token, msg => {
     if (msg.serverTime) offset = msg.serverTime - Date.now();
     if (msg.type === 'welcome') { if (epoch !== msg.epoch) { versions.clear(); epoch = msg.epoch; } $('#served').textContent = `Served by ${msg.instance} · SQLite WAL`; }
@@ -52,7 +59,7 @@ async function login() {
     if (msg.type === 'snapshot' || msg.type === 'state') {
       const a = msg.state; if (a.id !== selected) return;
       if (a.epoch !== epoch) { versions.clear(); epoch = a.epoch; }
-      if (msg.type !== 'snapshot' && a.version <= (versions.get(a.id) || 0)) return;
+      if (a.version < (versions.get(a.id) || 0) || (state && a.version === versions.get(a.id))) return;
       versions.set(a.id, a.version); offset = a.serverTime - Date.now(); const old = state; state = a; renderAuction(a, old);
     }
     if (msg.type === 'bid_result') toast(msg.ok ? `${msg.duplicate ? 'Confirmed again' : 'Bid accepted'} · PKR ${money(msg.amount)}` : `${msg.reason.replaceAll('_', ' ')}${msg.minimum ? ' · minimum PKR ' + money(msg.minimum) : ''}`, !msg.ok);
@@ -60,12 +67,15 @@ async function login() {
     if (msg.type === 'auth_expired') login().catch(e => toast(e.message, true));
   }, value => { $('#connection').textContent = value; $('#connection').classList.toggle('connected', ['Connected', 'Resynced'].includes(value)); });
   if (selected) connection.auctionId = selected;
+  if (previousUser === user.id && previousPending) connection.pending = previousPending;
 }
 $('#identity').onchange = () => login().catch(e => toast(e.message, true));
 $('#create-form').onsubmit = async e => {
+  try {
   e.preventDefault(); const f = new FormData(e.target); const startsAt = Date.now() + offset + Number(f.get('delay')) * 1000;
   const response = await fetch('/api/auctions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ item: f.get('item'), stock: Number(f.get('stock')), startingPrice: Math.round(Number(f.get('startingPrice')) * 100), minIncrement: Math.round(Number(f.get('minIncrement')) * 100), startsAt, endsAt: startsAt + Number(f.get('duration')) * 1000 }) });
   const result = await response.json(); if (result.ok) { toast('Your auction is live.'); select(result.state.id); } else toast(result.reason, true);
+  } catch (error) { toast(`Could not create auction: ${error.message}`, true); }
 };
 window.addEventListener('message', e => { if (e.origin !== location.origin) return; if (e.data.type === 'demo-select') select(e.data.id); if (e.data.type === 'demo-disconnect') connection.disconnect(); if (e.data.type === 'demo-bid' && state && state.status !== 'ended') connection.bid(minimum(state) + Math.floor(Math.random() * 5) * state.minIncrement); });
 login().catch(e => toast(e.message, true));

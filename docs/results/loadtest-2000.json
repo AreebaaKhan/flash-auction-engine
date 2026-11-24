@@ -1,0 +1,55 @@
+{
+  "executedAt": "2026-11-24T20:56:19.957Z",
+  "machine": {
+    "node": "v24.22.1",
+    "platform": "win32 10.0.26300",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logicalCpus": 12,
+    "totalMemoryGiB": 15.7
+  },
+  "status": "COMPLETED_WITH_ERRORS",
+  "offeredConnections": 2000,
+  "achievedConnections": 2000,
+  "peakConnected": 2000,
+  "connectionFailures": 0,
+  "droppedConnections": 0,
+  "configuredRampMs": 2000,
+  "auctionDurationSeconds": 15,
+  "rounds": 7,
+  "attempted": 14000,
+  "accepted": 1983,
+  "rejected": 4087,
+  "rejectedByReason": {
+    "BID_TOO_LOW": 3551,
+    "ENDED": 536
+  },
+  "duplicates": 0,
+  "timeouts": 7930,
+  "protocolErrors": 0,
+  "peakInFlight": 14000,
+  "latencyMs": {
+    "p50": 10210.39,
+    "p95": 11805.4,
+    "p99": 11937.41,
+    "samples": 6070
+  },
+  "offeredAttemptsPerSecond": 1407,
+  "acceptedBidsPerSecond": 199,
+  "peakCombinedRssMiB": 197,
+  "cpuMs": {
+    "user": 4109,
+    "system": 5062
+  },
+  "totalDurationMs": 27889,
+  "conditions": "Server and generator share one Node process and machine; real localhost WebSockets, disk-backed SQLite FULL, raised rate limits, anti-sniping disabled to keep the final-10-second measurement fixed. Latency excludes requests that timed out; timeouts are reported separately. No 50k claim.",
+  "serverCounters": {
+    "attempts": 8170,
+    "accepted": 1983,
+    "rejected": 6187,
+    "duplicates": 0,
+    "slowClients": 0,
+    "connectionsTotal": 2000
+  },
+  "serverPersistedBids": 1983,
+  "responseDrainTimeoutMs": 10000
+}

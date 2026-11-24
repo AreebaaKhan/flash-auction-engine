@@ -1,0 +1,191 @@
+{
+  "executedAt": "2026-11-24T20:18:37.657Z",
+  "machine": {
+    "node": "v24.22.1",
+    "platform": "win32 10.0.26300",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logicalCpus": 12,
+    "totalMemoryGiB": 15.7
+  },
+  "naive": {
+    "attempts": 10000,
+    "concurrency": 128,
+    "accepted": 9104,
+    "duplicates": 896,
+    "rejected": 0,
+    "persistedBidCount": 165,
+    "lostUpdates": 8939,
+    "correctTopN": false,
+    "expectedTopN": [
+      [
+        "bot-15",
+        100090
+      ],
+      [
+        "bot-14",
+        100080
+      ],
+      [
+        "bot-13",
+        100070
+      ],
+      [
+        "bot-12",
+        100060
+      ],
+      [
+        "bot-11",
+        100050
+      ],
+      [
+        "bot-10",
+        100040
+      ],
+      [
+        "bot-9",
+        100030
+      ],
+      [
+        "bot-8",
+        100020
+      ],
+      [
+        "bot-7",
+        100010
+      ],
+      [
+        "bot-6",
+        100000
+      ]
+    ],
+    "actualTopN": [
+      [
+        "bot-11",
+        100050
+      ],
+      [
+        "bot-127",
+        99930
+      ],
+      [
+        "bot-115",
+        99810
+      ],
+      [
+        "bot-121",
+        98590
+      ],
+      [
+        "bot-30",
+        97680
+      ],
+      [
+        "bot-124",
+        97340
+      ],
+      [
+        "bot-123",
+        97330
+      ],
+      [
+        "bot-6",
+        96160
+      ],
+      [
+        "bot-86",
+        95680
+      ],
+      [
+        "bot-77",
+        93030
+      ]
+    ],
+    "elapsedMs": 2808
+  },
+  "correct": {
+    "status": "PASS",
+    "executedAt": "2026-11-24T20:18:37.576Z",
+    "machine": {
+      "node": "v24.22.1",
+      "platform": "win32 10.0.26300",
+      "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+      "logicalCpus": 12,
+      "totalMemoryGiB": 15.7
+    },
+    "transport": "real WebSockets, ephemeral localhost server, disk-backed SQLite WAL FULL",
+    "attempts": 10000,
+    "connections": 128,
+    "configuredConcurrency": 128,
+    "peakInFlight": 128,
+    "accepted": 9104,
+    "rejected": 0,
+    "rejectedByReason": {},
+    "duplicates": 896,
+    "elapsedMs": 24150,
+    "attemptsPerSecond": 414,
+    "rateLimits": "Raised only in isolated benchmark to measure contention; production defaults unchanged",
+    "verification": {
+      "acceptedEvents": 9104,
+      "highest": 100090,
+      "topN": [
+        {
+          "userId": "bot-15",
+          "amount": 100090,
+          "version": 9105
+        },
+        {
+          "userId": "bot-14",
+          "amount": 100080,
+          "version": 9104
+        },
+        {
+          "userId": "bot-13",
+          "amount": 100070,
+          "version": 9103
+        },
+        {
+          "userId": "bot-12",
+          "amount": 100060,
+          "version": 9102
+        },
+        {
+          "userId": "bot-11",
+          "amount": 100050,
+          "version": 9101
+        },
+        {
+          "userId": "bot-10",
+          "amount": 100040,
+          "version": 9100
+        },
+        {
+          "userId": "bot-9",
+          "amount": 100030,
+          "version": 9099
+        },
+        {
+          "userId": "bot-8",
+          "amount": 100020,
+          "version": 9098
+        },
+        {
+          "userId": "bot-7",
+          "amount": 100010,
+          "version": 9097
+        },
+        {
+          "userId": "bot-6",
+          "amount": 100000,
+          "version": 9096
+        }
+      ],
+      "strictVersions": true,
+      "dbMatchesMemory": true,
+      "uniqueWinners": true,
+      "noOverselling": true,
+      "persistedOrders": 10,
+      "repeatFinalizationSafe": true
+    }
+  },
+  "interpretation": "Same generated intents and concurrency, different observed interleavings. The baseline deliberately crosses an await with stale state; REST itself is not the defect. This is a correctness comparison, not a fair latency benchmark: naive has an injected delay and an in-memory SQLite row; correct has disk-backed transactional persistence."
+}

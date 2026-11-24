@@ -14,7 +14,7 @@ export class LiveConnection {
         for (const request of this.pending.values()) this.send(request);
         return;
       }
-      if (msg.type === 'bid_result') this.pending.delete(msg.requestId);
+      if (msg.type === 'bid_result' || (msg.type === 'error' && msg.requestId)) this.pending.delete(msg.requestId);
       this.onMessage(msg);
     };
     ws.onclose = event => {

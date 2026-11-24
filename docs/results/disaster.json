@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "executedAt": "2026-11-24T20:14:13.096Z",
+  "scope": "Isolated SQLite engine recovery; Bacula NOT executed",
+  "checkpointSha256": "1b75de0f069e364a67296dcf9c4512f0e6d4c90d07ae1972c8f4395fe5af26c5",
+  "restoredSha256": "1b75de0f069e364a67296dcf9c4512f0e6d4c90d07ae1972c8f4395fe5af26c5",
+  "backupFileSha256": "6cd1c52610f0ac4d7e56d628cea15cf9648ab2ca8c5eea627f9a00d2b88c65ff",
+  "counts": {
+    "auctions": 2,
+    "bids": 12,
+    "positions": 4,
+    "orders": 3,
+    "outcomes": 12
+  },
+  "restoredCounts": {
+    "auctions": 2,
+    "bids": 12,
+    "positions": 4,
+    "orders": 3,
+    "outcomes": 12
+  },
+  "lostPostBackupBids": 1,
+  "checkpointAgeAtFailureMs": 128,
+  "postBackupBidAt": 1795551253071,
+  "measuredRtoMs": 18.04,
+  "rtoDefinition": "Database deletion begins to reopened engine and exact logical verification; excludes backup creation and user/browser reconnection"
+}

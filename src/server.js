@@ -60,7 +60,7 @@ export async function startServer(overrides = {}) {
   function send(ws, message) {
     if (ws.readyState !== WebSocket.OPEN) return;
     if (ws.bufferedAmount > cfg.maxBuffer) { counters.slowClients++; ws.terminate(); return; }
-    ws.send(JSON.stringify(message));
+    ws.send(typeof message === 'string' ? message : JSON.stringify(message));
   }
   server.on('upgrade', (req, socket, head) => {
     const ip = req.socket.remoteAddress || 'unknown';
@@ -79,10 +79,10 @@ export async function startServer(overrides = {}) {
     ws.on('close', () => { clearTimeout(authTimeout); const count = (connectionsByIp.get(ws.ip) || 1) - 1; if (count) connectionsByIp.set(ws.ip, count); else connectionsByIp.delete(ws.ip); });
     ws.on('message', raw => {
       try {
-        if (!ips.take(ws.ip)) return send(ws, { type: 'error', reason: 'IP_RATE_LIMITED' });
         const msg = JSON.parse(raw);
         if (!msg || typeof msg !== 'object') return send(ws, { type: 'error', reason: 'INVALID_MESSAGE' });
         const requestId = typeof msg.requestId === 'string' ? msg.requestId.slice(0, 100) : null;
+        if (!ips.take(ws.ip)) return send(ws, { type: 'error', reason: 'IP_RATE_LIMITED', requestId });
         if (msg.type === 'auth') {
           if (ws.user) return send(ws, { type: 'error', reason: 'ALREADY_AUTHENTICATED', requestId });
           ws.user = verifyToken(msg.token, cfg.secret);
@@ -113,12 +113,18 @@ export async function startServer(overrides = {}) {
   });
   const broadcast = setInterval(() => {
     if (!engine.dirty.size) return;
-    const changed = new Set(engine.dirty); engine.dirty.clear(); const summary = { type: 'catalog', auctions: catalog(engine), epoch: engine.epoch };
-    for (const ws of wss.clients) if (ws.user) { send(ws, summary); if (changed.has(ws.auctionId)) send(ws, { type: 'state', state: engine.snapshot(ws.auctionId) }); }
+    const changed = new Set(engine.dirty); engine.dirty.clear();
+    const summary = JSON.stringify({ type: 'catalog', auctions: catalog(engine), epoch: engine.epoch });
+    const snapshots = new Map([...changed].map(id => [id, JSON.stringify({ type: 'state', state: engine.snapshot(id) })]));
+    for (const ws of wss.clients) if (ws.user) { send(ws, summary); if (snapshots.has(ws.auctionId)) send(ws, snapshots.get(ws.auctionId)); }
   }, cfg.broadcastMs);
+  let lastClockPush = 0;
   const clock = setInterval(() => {
     try { if (!failed) engine.finalizeDue(); } catch (e) { failed = true; console.error('Finalization failed:', e.message); }
-    for (const ws of wss.clients) if (ws.user) send(ws, { type: 'clock', serverTime: Date.now(), epoch: engine.epoch });
+    if (Date.now() - lastClockPush >= 1000) {
+      lastClockPush = Date.now(); const message = JSON.stringify({ type: 'clock', serverTime: lastClockPush, epoch: engine.epoch });
+      for (const ws of wss.clients) if (ws.user) send(ws, message);
+    }
     ips.prune();
   }, 250);
   const heartbeat = setInterval(() => {

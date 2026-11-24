@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "executedAt": "2026-11-24T20:15:43.045Z",
+  "machine": {
+    "node": "v24.22.1",
+    "platform": "win32 10.0.26300",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "logicalCpus": 12,
+    "totalMemoryGiB": 15.7
+  },
+  "transport": "real WebSockets, ephemeral localhost server, disk-backed SQLite WAL FULL",
+  "attempts": 10000,
+  "connections": 128,
+  "configuredConcurrency": 128,
+  "peakInFlight": 128,
+  "accepted": 9080,
+  "rejected": 24,
+  "rejectedByReason": {
+    "BID_TOO_LOW": 24
+  },
+  "duplicates": 896,
+  "elapsedMs": 20375,
+  "attemptsPerSecond": 491,
+  "rateLimits": "Raised only in isolated benchmark to measure contention; production defaults unchanged",
+  "verification": {
+    "acceptedEvents": 9080,
+    "highest": 100090,
+    "topN": [
+      {
+        "userId": "bot-15",
+        "amount": 100090,
+        "version": 9081
+      },
+      {
+        "userId": "bot-14",
+        "amount": 100080,
+        "version": 9080
+      },
+      {
+        "userId": "bot-13",
+        "amount": 100070,
+        "version": 9079
+      },
+      {
+        "userId": "bot-12",
+        "amount": 100060,
+        "version": 9078
+      },
+      {
+        "userId": "bot-11",
+        "amount": 100050,
+        "version": 9077
+      },
+      {
+        "userId": "bot-10",
+        "amount": 100040,
+        "version": 9076
+      },
+      {
+        "userId": "bot-9",
+        "amount": 100030,
+        "version": 9075
+      },
+      {
+        "userId": "bot-8",
+        "amount": 100020,
+        "version": 9074
+      },
+      {
+        "userId": "bot-7",
+        "amount": 100010,
+        "version": 9073
+      },
+      {
+        "userId": "bot-6",
+        "amount": 100000,
+        "version": 9072
+      }
+    ],
+    "strictVersions": true,
+    "dbMatchesMemory": true,
+    "uniqueWinners": true,
+    "noOverselling": true,
+    "persistedOrders": 10,
+    "repeatFinalizationSafe": true
+  }
+}
